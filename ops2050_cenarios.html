@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OPS 2050 — Cenários do Ecossistema de Saúde</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Sans:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161e;
+    --surface2: #1a1e28;
+    --border: rgba(255,255,255,0.07);
+    --border-bright: rgba(255,255,255,0.14);
+    --text: #e8eaf0;
+    --muted: #7a8099;
+    --teal: #2dd4bf;
+    --teal-dim: rgba(45,212,191,0.12);
+    --teal-border: rgba(45,212,191,0.35);
+    --amber: #f59e0b;
+    --amber-dim: rgba(245,158,11,0.12);
+    --amber-border: rgba(245,158,11,0.35);
+    --coral: #f87171;
+    --coral-dim: rgba(248,113,113,0.12);
+    --coral-border: rgba(248,113,113,0.35);
+    --red: #ef4444;
+    --red-dim: rgba(239,68,68,0.12);
+    --red-border: rgba(239,68,68,0.35);
+    --purple: #a78bfa;
+    --purple-dim: rgba(167,139,250,0.12);
+    --purple-border: rgba(167,139,250,0.35);
+    --blue: #60a5fa;
+    --blue-dim: rgba(96,165,250,0.12);
+    --blue-border: rgba(96,165,250,0.35);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* NOISE TEXTURE */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* HEADER */
+  header {
+    padding: 48px 40px 32px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  header::after {
+    content: '';
+    position: absolute; bottom: 0; left: 40px; right: 40px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--teal), transparent);
+    opacity: 0.4;
+  }
+  .header-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #fff;
+    margin-bottom: 16px;
+  }
+  header h1 span { color: var(--teal); }
+  .header-meta {
+    display: flex; gap: 24px; flex-wrap: wrap;
+    font-size: 12px; color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .header-meta span { display: flex; align-items: center; gap: 6px; }
+  .header-meta span::before { content: '·'; color: var(--teal); }
+
+  /* MATRIX INTRO */
+  .matrix-section {
+    padding: 32px 40px;
+    border-bottom: 1px solid var(--border);
+  }
+  .matrix-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.12em;
+    margin-bottom: 20px;
+  }
+  .matrix-grid {
+    display: grid;
+    grid-template-columns: 24px 1fr 1fr;
+    grid-template-rows: 24px 1fr 1fr;
+    gap: 4px;
+    max-width: 560px;
+  }
+  .matrix-axis-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; color: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    white-space: nowrap;
+  }
+  .matrix-axis-label.vert { writing-mode: vertical-rl; transform: rotate(180deg); }
+  .matrix-cell {
+    padding: 16px; border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    position: relative;
+  }
+  .matrix-cell:hover { transform: translateY(-2px); }
+  .matrix-cell .c-id {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .matrix-cell .c-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px; font-weight: 700;
+    line-height: 1.2;
+  }
+  .matrix-cell .c-desc {
+    font-size: 11px; color: var(--muted);
+    margin-top: 4px; line-height: 1.4;
+  }
+  .cell-i    { background: var(--amber-dim); border-color: var(--amber-border); }
+  .cell-i .c-title { color: var(--amber); }
+  .cell-ii   { background: var(--teal-dim);  border-color: var(--teal-border);  }
+  .cell-ii .c-title { color: var(--teal); }
+  .cell-iii  { background: var(--red-dim);   border-color: var(--red-border);   }
+  .cell-iii .c-title { color: var(--red); }
+  .cell-iv   { background: var(--coral-dim); border-color: var(--coral-border); }
+  .cell-iv .c-title { color: var(--coral); }
+
+  /* FILTER BAR */
+  .filter-bar {
+    padding: 20px 40px;
+    border-bottom: 1px solid var(--border);
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+  }
+  .filter-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; color: var(--muted);
+    margin-right: 8px;
+  }
+  .filter-btn {
+    padding: 5px 14px;
+    border-radius: 100px;
+    border: 1px solid var(--border-bright);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; cursor: pointer;
+    transition: all 0.18s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--surface2);
+    color: var(--text);
+    border-color: var(--border-bright);
+  }
+  .expand-all {
+    margin-left: auto;
+    padding: 5px 14px;
+    border-radius: 100px;
+    border: 1px solid var(--teal-border);
+    background: var(--teal-dim);
+    color: var(--teal);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; cursor: pointer;
+    transition: all 0.18s;
+  }
+  .expand-all:hover { background: rgba(45,212,191,0.2); }
+
+  /* SCENARIO LIST */
+  .scenarios { padding: 24px 40px 80px; }
+
+  /* ACCORDION ITEM */
+  .scenario-item {
+    margin-bottom: 8px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .scenario-item.open { border-color: var(--border-bright); }
+
+  .scenario-header {
+    display: flex; align-items: center; gap: 16px;
+    padding: 18px 24px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.18s;
+    background: var(--surface);
+  }
+  .scenario-header:hover { background: var(--surface2); }
+
+  .scenario-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; font-weight: 500;
+    padding: 3px 10px; border-radius: 4px;
+    flex-shrink: 0;
+    letter-spacing: 0.05em;
+  }
+
+  .scenario-titles { flex: 1; min-width: 0; }
+  .scenario-id {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; color: var(--muted);
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
+  .scenario-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px; font-weight: 700;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .scenario-subtitle {
+    font-size: 12px; color: var(--muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .scenario-meta {
+    display: flex; gap: 16px; align-items: center;
+    flex-shrink: 0;
+  }
+  .meta-pill {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; color: var(--muted);
+    background: var(--surface2);
+    padding: 3px 8px; border-radius: 4px;
+  }
+  .chevron {
+    width: 20px; height: 20px;
+    border: 1px solid var(--border-bright);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: var(--muted);
+    flex-shrink: 0;
+    transition: transform 0.25s, background 0.18s;
+  }
+  .scenario-item.open .chevron { transform: rotate(180deg); }
+
+  /* CONTENT PANEL */
+  .scenario-body {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1);
+    background: var(--surface);
+  }
+  .scenario-item.open .scenario-body { max-height: 8000px; }
+  .scenario-body-inner { padding: 0 24px 28px; }
+
+  /* ANCHOR QUOTE */
+  .anchor-quote {
+    padding: 16px 20px;
+    border-radius: 8px;
+    border-left: 3px solid;
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+  .anchor-quote .quote-text {
+    font-size: 14px; font-weight: 500; line-height: 1.6;
+    margin-bottom: 6px;
+  }
+  .anchor-quote .quote-source {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; color: var(--muted); font-style: normal;
+  }
+
+  /* SECTION */
+  .section { margin-bottom: 24px; }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 0.02em;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .s-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; color: var(--muted);
+  }
+
+  /* PROSE */
+  .prose {
+    font-size: 13.5px; line-height: 1.75; color: #c8cad4;
+    margin-bottom: 12px;
+  }
+
+  /* MECHANISM CARDS */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px; margin-top: 12px;
+  }
+  .card {
+    padding: 14px 16px;
+    border-radius: 8px;
+    border: 1px solid;
+    background: rgba(255,255,255,0.02);
+    transition: background 0.18s, transform 0.18s;
+    cursor: default;
+  }
+  .card:hover { background: rgba(255,255,255,0.05); transform: translateY(-1px); }
+  .card-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; letter-spacing: 0.1em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px; font-weight: 700;
+    margin-bottom: 6px; line-height: 1.3;
+  }
+  .card-body { font-size: 12px; line-height: 1.6; color: #9ca3af; }
+  .card-source {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; margin-top: 6px; opacity: 0.6;
+  }
+
+  /* PILLS ROW */
+  .pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .pill {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; padding: 3px 10px;
+    border-radius: 100px; border: 1px solid;
+    background: rgba(255,255,255,0.03);
+  }
+
+  /* SIGNALS */
+  .signals { margin-top: 10px; }
+  .signal {
+    padding: 10px 14px;
+    border-radius: 6px; border: 1px solid;
+    margin-bottom: 6px;
+    font-size: 12.5px; line-height: 1.5;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .signal-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    flex-shrink: 0; margin-top: 5px;
+  }
+
+  /* STAKEHOLDER TABLE */
+  .stk-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px; margin-top: 10px;
+  }
+  .stk-item {
+    padding: 10px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+  }
+  .stk-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .stk-text { font-size: 12px; line-height: 1.5; color: #b0b4c4; }
+
+  /* MATRIX LOCATOR inside body */
+  .matrix-locator {
+    display: inline-flex; gap: 4px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    margin-bottom: 20px;
+    font-size: 11px;
+  }
+  .ml-cell {
+    width: 52px; height: 36px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; color: var(--muted);
+    text-align: center; line-height: 1.2;
+  }
+  .ml-cell.active { font-weight: 600; }
+
+  /* FM tags */
+  .fm-tags {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .fm-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; padding: 4px 12px;
+    border-radius: 4px; border: 1px solid;
+  }
+
+  /* color variants applied via JS */
+  .var-teal  .scenario-badge { background: var(--teal-dim);   color: var(--teal);   border: 1px solid var(--teal-border); }
+  .var-teal  .scenario-name  { color: var(--teal); }
+  .var-teal  .anchor-quote   { border-color: var(--teal);   background: var(--teal-dim); }
+  .var-teal  .anchor-quote .quote-text { color: var(--teal); }
+  .var-teal  .section-title  { color: var(--teal); }
+  .var-teal  .card           { border-color: var(--teal-border); }
+  .var-teal  .card-num       { color: var(--teal); }
+  .var-teal  .card-title     { color: var(--teal); }
+  .var-teal  .pill           { border-color: var(--teal-border); color: var(--teal); }
+  .var-teal  .signal         { border-color: var(--teal-border); background: var(--teal-dim); }
+  .var-teal  .signal-dot     { background: var(--teal); }
+
+  .var-amber .scenario-badge { background: var(--amber-dim);  color: var(--amber);  border: 1px solid var(--amber-border); }
+  .var-amber .scenario-name  { color: var(--amber); }
+  .var-amber .anchor-quote   { border-color: var(--amber);  background: var(--amber-dim); }
+  .var-amber .anchor-quote .quote-text { color: var(--amber); }
+  .var-amber .section-title  { color: var(--amber); }
+  .var-amber .card           { border-color: var(--amber-border); }
+  .var-amber .card-num       { color: var(--amber); }
+  .var-amber .card-title     { color: var(--amber); }
+  .var-amber .pill           { border-color: var(--amber-border); color: var(--amber); }
+  .var-amber .signal         { border-color: var(--amber-border); background: var(--amber-dim); }
+  .var-amber .signal-dot     { background: var(--amber); }
+
+  .var-coral .scenario-badge { background: var(--coral-dim);  color: var(--coral);  border: 1px solid var(--coral-border); }
+  .var-coral .scenario-name  { color: var(--coral); }
+  .var-coral .anchor-quote   { border-color: var(--coral);  background: var(--coral-dim); }
+  .var-coral .anchor-quote .quote-text { color: var(--coral); }
+  .var-coral .section-title  { color: var(--coral); }
+  .var-coral .card           { border-color: var(--coral-border); }
+  .var-coral .card-num       { color: var(--coral); }
+  .var-coral .card-title     { color: var(--coral); }
+  .var-coral .pill           { border-color: var(--coral-border); color: var(--coral); }
+  .var-coral .signal         { border-color: var(--coral-border); background: var(--coral-dim); }
+  .var-coral .signal-dot     { background: var(--coral); }
+
+  .var-red   .scenario-badge { background: var(--red-dim);    color: var(--red);    border: 1px solid var(--red-border); }
+  .var-red   .scenario-name  { color: var(--red); }
+  .var-red   .anchor-quote   { border-color: var(--red);    background: var(--red-dim); }
+  .var-red   .anchor-quote .quote-text { color: var(--red); }
+  .var-red   .section-title  { color: var(--red); }
+  .var-red   .card           { border-color: var(--red-border); }
+  .var-red   .card-num       { color: var(--red); }
+  .var-red   .card-title     { color: var(--red); }
+  .var-red   .pill           { border-color: var(--red-border); color: var(--red); }
+  .var-red   .signal         { border-color: var(--red-border); background: var(--red-dim); }
+  .var-red   .signal-dot     { background: var(--red); }
+
+  .var-purple .scenario-badge { background: var(--purple-dim); color: var(--purple); border: 1px solid var(--purple-border); }
+  .var-purple .scenario-name  { color: var(--purple); }
+  .var-purple .anchor-quote   { border-color: var(--purple); background: var(--purple-dim); }
+  .var-purple .anchor-quote .quote-text { color: var(--purple); }
+  .var-purple .section-title  { color: var(--purple); }
+  .var-purple .card           { border-color: var(--purple-border); }
+  .var-purple .card-num       { color: var(--purple); }
+  .var-purple .card-title     { color: var(--purple); }
+  .var-purple .pill           { border-color: var(--purple-border); color: var(--purple); }
+  .var-purple .signal         { border-color: var(--purple-border); background: var(--purple-dim); }
+  .var-purple .signal-dot     { background: var(--purple); }
+
+  .var-blue  .scenario-badge { background: var(--blue-dim);   color: var(--blue);   border: 1px solid var(--blue-border); }
+  .var-blue  .scenario-name  { color: var(--blue); }
+  .var-blue  .anchor-quote   { border-color: var(--blue);   background: var(--blue-dim); }
+  .var-blue  .anchor-quote .quote-text { color: var(--blue); }
+  .var-blue  .section-title  { color: var(--blue); }
+  .var-blue  .card           { border-color: var(--blue-border); }
+  .var-blue  .card-num       { color: var(--blue); }
+  .var-blue  .card-title     { color: var(--blue); }
+  .var-blue  .pill           { border-color: var(--blue-border); color: var(--blue); }
+  .var-blue  .signal         { border-color: var(--blue-border); background: var(--blue-dim); }
+  .var-blue  .signal-dot     { background: var(--blue); }
+
+  /* divider inside body */
+  .body-divider {
+    height: 1px; background: var(--border);
+    margin: 20px 0;
+  }
+
+  @media (max-width: 640px) {
+    header, .matrix-section, .filter-bar, .scenarios { padding-left: 16px; padding-right: 16px; }
+    .stk-grid { grid-template-columns: 1fr; }
+    .scenario-header { padding: 14px 16px; gap: 10px; }
+    .scenario-meta { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-label">OPS 2050 · ABIMED × FIA · Observatório Permanente da Saúde</div>
+  <h1>Cenários do<br><span>Ecossistema de Saúde</span><br>Brasileiro até 2050</h1>
+  <div class="header-meta">
+    <span>8 cenários estratégicos</span>
+    <span>21 videocasts · 529 trechos codificados</span>
+    <span>Horizonte 2050</span>
+    <span>Propostas para candidatos presidenciais · ago/2026</span>
+  </div>
+</header>
+
+<div class="matrix-section">
+  <div class="matrix-label">Matriz 2×2 · Cenários I–IV · FM-T1 (Governança) × FM-T2 (Digital)</div>
+  <div class="matrix-grid">
+    <div></div>
+    <div class="matrix-axis-label" style="font-size:9px">FM-T2− Lento</div>
+    <div class="matrix-axis-label" style="font-size:9px">FM-T2+ Soberano</div>
+    <div class="matrix-axis-label vert" style="font-size:9px">FM-T1+ Forte</div>
+    <div class="matrix-cell cell-i" onclick="jumpTo('cen-I')">
+      <div class="c-id">Cenário I</div>
+      <div class="c-title">Ilha da Excelência Digital</div>
+      <div class="c-desc">Governança avança, digital fragmentado</div>
+    </div>
+    <div class="matrix-cell cell-ii" onclick="jumpTo('cen-II')">
+      <div class="c-id">Cenário II ★</div>
+      <div class="c-title">Sistema Regenerativo</div>
+      <div class="c-desc">Cenário-alvo · ambas as FMs convergem</div>
+    </div>
+    <div class="matrix-axis-label vert" style="font-size:9px">FM-T1− Fraca</div>
+    <div class="matrix-cell cell-iii" onclick="jumpTo('cen-III')">
+      <div class="c-id">Cenário III</div>
+      <div class="c-title">Simulacro Permanente</div>
+      <div class="c-desc">Mais provável sem intervenção</div>
+    </div>
+    <div class="matrix-cell cell-iv" onclick="jumpTo('cen-IV')">
+      <div class="c-id">Cenário IV</div>
+      <div class="c-title">Plataforma sem República</div>
+      <div class="c-desc">Digital capturado, governança ausente</div>
+    </div>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <span class="filter-label">Filtrar:</span>
+  <button class="filter-btn active" onclick="filterAll(this)">Todos os 8</button>
+  <button class="filter-btn" onclick="filterGroup('emergente', this)">A B C D — Emergentes</button>
+  <button class="filter-btn" onclick="filterGroup('matriz', this)">I II III IV — Matriz 2×2</button>
+  <button class="filter-btn" onclick="filterColor('teal', this)">Favoráveis</button>
+  <button class="filter-btn" onclick="filterColor('red coral', this)">Adversos</button>
+  <button class="expand-all" onclick="toggleAll()">Expandir todos</button>
+</div>
+
+<div class="scenarios" id="scenarios-list">
+<!-- CENÁRIOS INJETADOS VIA JS -->
+</div>
+
+<script>
+const CENARIOS = [
+
+// ─── CENÁRIO A ────────────────────────────────────────────────────────────────
+{
+  id: 'cen-A', code: 'A', badge: 'Emergente',
+  name: 'O Grande Divórcio',
+  subtitle: 'Bifurcação silenciosa do sistema em três camadas',
+  group: 'emergente', color: 'amber',
+  meta: ['50 trechos', '13 transcrições', 'IND-007+017+010+016'],
+  fm: ['EIX-04 Acesso', 'EIX-05 Regulação', 'E2/E4'],
+  anchor: {
+    text: '"Vai evoluir para um SUS dois através de verticalizações — mantendo-se o SUS original por razões ideológicas."',
+    source: 'Westenberger (T03)'
+  },
+  sections: [
+    {
+      title: 'O que é e por que importa',
+      prose: 'O Cenário A documenta uma bifurcação que já está em curso no presente: o sistema brasileiro de saúde se triplica silenciosamente sem que nenhuma decisão política explícita o declare. Não é reforma — é evolução orgânica de pressões acumuladas. A estratificação acontece em três camadas simultâneas, cada uma com lógica própria e população específica.',
+    },
+    {
+      title: 'As três camadas do divórcio',
+      cards: [
+        { num: 'Camada 1', title: 'SUS mínimo', body: '~120M de pessoas. Atenção básica, urgência, alta complexidade seletiva. Subfinanciado estruturalmente: 75% da população com 40% do orçamento.', source: 'Siqueira (T10)' },
+        { num: 'Camada 2', title: 'Zona cinzenta', body: '40–60M atendidos por cartões de desconto — não contemplados nem pelo SUS nem pelo privado regulado. Crescimento >15%/ano.', source: 'Rebelo (T19)' },
+        { num: 'Camada 3', title: 'Privado premium', body: '53M+ com plano regulado. Alta tecnologia, VBHC emergente, mas com 60% do orçamento total do sistema.', source: 'Siqueira (T10)' },
+      ]
+    },
+    {
+      title: 'Mecanismo central',
+      prose: 'A Lei 14.307 é o embrião documentado do divórcio: 60 dias para incorporação na suplementar vs. até 3 anos no SUS. O mesmo produto aprovado pela CONITEC chega ao plano em 2 meses e ao SUS em 36. A diferença cronológica produz diferença clínica — e depois, diferença de desfecho. A cirurgia robótica para prostatectomia aguardou 17 anos (Siqueira, T10). Quem tinha plano operou em 2009. Quem dependia do SUS, em 2026.',
+    },
+    {
+      title: 'Sinais precoces',
+      signals: [
+        'Crescimento de planos de saúde básicos acima de 15%/ano por dois anos consecutivos',
+        'Mercado de cartões de desconto ultrapassa 60 milhões de usuários',
+        'Ausência de PL instituindo URV da saúde no Congresso até dez/2026',
+      ]
+    }
+  ]
+},
+
+// ─── CENÁRIO B ────────────────────────────────────────────────────────────────
+{
+  id: 'cen-B', code: 'B', badge: 'Emergente',
+  name: 'Soberania ou Dependência Digital',
+  subtitle: 'Bifurcação com ponto de não-retorno nos dados de saúde',
+  group: 'emergente', color: 'blue',
+  meta: ['111 trechos', '14 transcrições', 'IND-013+009+018+019'],
+  fm: ['EIX-01 Digital', 'EIX-05 Regulação', 'E1/E2'],
+  anchor: {
+    text: '"O maior risco não é errar uma decisão — é tomar decisões corretas com ferramentas que não respondem à realidade atual."',
+    source: 'Thiago (T05) · o cenário mais denso do corpus'
+  },
+  sections: [
+    {
+      title: 'A bifurcação central',
+      prose: 'O Cenário B é o mais denso do corpus (111 trechos, 14 transcrições) e o único com ponto de não-retorno claramente identificado. A RNDS com 4,3 bilhões de registros (Haddad, T10) e 92% das UBS digitalizadas representa uma infraestrutura pública de dados sem paralelo na América Latina. A decisão de governança sobre essa infraestrutura — soberania nacional ou captura por plataformas estrangeiras — precisa ser tomada antes que os contratos se consolidem. Depois que o ouro digital sai do país, não volta.',
+    },
+    {
+      title: 'Os dois polos do cenário',
+      cards: [
+        { num: 'Polo +', title: 'Soberania digital', body: 'Modelo B3 aprovado (Cerri, T11): 15% redução de custos. Open Care obrigatório. RNDS em nuvens governamentais (Haddad, T10). Dados como ativo nacional.', source: 'T10, T11, T12' },
+        { num: 'Polo −', title: 'Dependência digital', body: 'Big techs capturam RNDS antes do marco regulatório. Rotatividade 2-3 anos impede investimento longitudinal. Regulação não desenhada para interoperabilidade.', source: 'Arantes (T20)' },
+      ]
+    },
+    {
+      title: 'As três barreiras estruturais',
+      prose: 'Arantes (T20) documentou com precisão as três barreiras que impedem a soberania digital no polo negativo: (1) Regulatória — a regulação atual não foi desenhada para induzir interoperabilidade; (2) Concorrencial — operadoras retêm dados como ativo competitivo; (3) Rotatividade — 2-3 anos de contrato = desincentivo estrutural ao investimento longitudinal. Coelho (T11) adicionou a dimensão geopolítica: "Quem tiver supercomputadores para processar dados em escala, terá vantagem." Sem supercomputadores públicos, o polo negativo prevalece.',
+    },
+    {
+      title: 'Sinais precoces',
+      signals: [
+        'Marco regulatório de interoperabilidade obrigatória publicado com prazo de 18 meses → Polo positivo',
+        'Contrato big tech estrangeira para RNDS sem cláusula de soberania de dados → Polo negativo',
+        'Decisão pública de governança da RNDS em nuvens soberanas com prazo de implementação',
+      ]
+    }
+  ]
+},
+
+// ─── CENÁRIO C ────────────────────────────────────────────────────────────────
+{
+  id: 'cen-C', code: 'C', badge: 'Emergente',
+  name: 'O Choque Climático-Sanitário',
+  subtitle: 'Colapso em câmera lenta — 16,5M de óbitos adicionais até 2050',
+  group: 'emergente', color: 'coral',
+  meta: ['44 trechos', '5 transcrições', 'IND-020 + EIX-06'],
+  fm: ['EIX-06 Clima', 'EIX-04 Acesso', 'E2/E3/E5'],
+  anchor: {
+    text: '"16,5 milhões de óbitos adicionais até 2050 por mudanças climáticas — equivalente a três pandemias distribuídas em 25 anos."',
+    source: 'Santana (T13) · Fórum Econômico Mundial + The Lancet'
+  },
+  sections: [
+    {
+      title: 'A força motriz transversal',
+      prose: 'O Cenário C documenta a única força motriz que age sobre todos os outros cenários independentemente da posição nas matrizes. As mudanças climáticas não são um eixo entre outros — são um multiplicador de vulnerabilidades. Igrejas (T14) introduziu o precedente jurídico que chegará ao Brasil: KlimaSeniorinnen vs. Suíça (TEDH, 2024) estabeleceu que inação estatal frente às mudanças climáticas pode ser violação de direitos humanos quando produz danos à saúde.',
+    },
+    {
+      title: 'Os três canais de impacto',
+      cards: [
+        { num: 'Canal 1', title: 'Direto', body: '3 milhões de mortes/ano por poluição do ar. Dengue endêmica acima do paralelo 23°S. 16,5M de óbitos adicionais projetados até 2050.', source: 'Santana (T13)' },
+        { num: 'Canal 2', title: 'Infraestrutura', body: 'Hospitais sem energia e sem água. "Apenas 1 em 10.000 gotas d\'água no planeta é potável." Cadeias logísticas de medicamentos interrompidas.', source: 'Rocha (T13)' },
+        { num: 'Canal 3', title: 'Econômico-fiscal', body: 'Crise hídrica SP-2014: 4M migraram ao SUS + R$10bi contingenciados. Custo projetado: US$12,5 trilhões até 2050.', source: 'Santana (T13)' },
+      ]
+    },
+    {
+      title: 'A resposta possível',
+      prose: 'O corpus documenta capacidade de resposta real. Roca (T14): Butantan como hub regional para dengue, chikungunya e zika. Programa Nascentes: 50 milhões de mudas sem dinheiro público. PEARC-SP como modelo de resiliência climática regional. Igrejas (T14): "A saúde planetária oferece uma perspectiva que integra saúde humana e sistemas naturais — o Brasil pode liderar esse paradigma na América Latina."',
+    },
+    {
+      title: 'Sinais precoces',
+      signals: [
+        'Dengue registrada de forma endêmica acima do paralelo 23°S por dois anos consecutivos',
+        'Hospital de grande porte paralisa cirurgias por falta de energia ou água por mais de 72h',
+        'Primeiro processo judicial climático-sanitário ajuizado no Brasil invocando KlimaSeniorinnen',
+      ]
+    }
+  ]
+},
+
+// ─── CENÁRIO D ────────────────────────────────────────────────────────────────
+{
+  id: 'cen-D', code: 'D', badge: 'Emergente',
+  name: 'A Reforma que Não Veio',
+  subtitle: 'O default da inércia — quando a janela se fecha',
+  group: 'emergente', color: 'red',
+  meta: ['94 trechos', '13 transcrições', 'IND-005+006+014+015'],
+  fm: ['EIX-05 Regulação', 'EIX-04 Acesso', 'EIX-07 Custo'],
+  anchor: {
+    text: '"Em dezembro de 2025, R$ 30 bilhões do Ministério da Saúde estavam sem execução por estados e municípios — quatro vezes o orçamento total de infraestrutura."',
+    source: 'Queiroga (T21)'
+  },
+  sections: [
+    {
+      title: 'A estrutura da inércia',
+      prose: 'O Cenário D não é o colapso — é a janela que se fecha. Arantes (T20) estimou com precisão: 7-8 anos para a janela de transição cooperativa. O OPS 2050 nasce exatamente no seu limite. Este cenário documenta os quatro mecanismos que bloqueiam a reforma estrutural mesmo quando o diagnóstico é consensual entre todos os 21 entrevistados.',
+    },
+    {
+      title: 'Os quatro mecanismos de bloqueio',
+      cards: [
+        { num: 'Bloqueio 1', title: 'Calendário eleitoral', body: 'Ano legislativo termina em junho. Pautas estruturantes comprimidas em janelas impossíveis. Sem a pandemia, teríamos lei da telessaúde? (Ventura, T11)', source: 'Ventura (T11)' },
+        { num: 'Bloqueio 2', title: 'Tríade PIC', body: 'Patrimonialismo + Ineficiência + Corrupção como "arritmia cardíaca que precisa de tratamento agressivo" (Queiroga, T21). R$ 6-7bi em fraudes anuais.', source: 'Queiroga (T21)' },
+        { num: 'Bloqueio 3', title: 'Tênis vs. frescobol', body: '"O setor joga tênis quando precisa jogar frescobol — cada um quer ganhar do outro em vez de manter a bola no ar." Articulação adversarial bloqueia reforma.', source: 'Rebelo (T19)' },
+        { num: 'Bloqueio 4', title: 'Déficit duplo', body: 'Recurso insuficiente + gestão inadequada. R$ 30bi parados sem execução (Queiroga, T21). O problema não é só quanto — é como.', source: 'Queiroga (T21)' },
+      ]
+    },
+    {
+      title: 'Por que 7-8 anos é o horizonte crítico',
+      prose: 'A janela de Arantes (T20) é construída sobre três pressões simultâneas que convergem no mesmo período: (1) pirâmide etária virando barril, com crescimento acelerado de custos de saúde do idoso; (2) fila cirúrgica que chegou a 1,3M em 2024 e continua crescendo; (3) reforma tributária que precisa de implementação estável para gerar os recursos que o sistema exige. Depois de 2032-2034, as opções se estreitam drasticamente.',
+    },
+    {
+      title: 'Sinais precoces',
+      signals: [
+        'Ausência de PL estruturante para pacto federativo da saúde no Congresso até dez/2026',
+        'Fila cirúrgica supera 1,5M sem plano de enfrentamento com metas mensuráveis',
+        'IND-006 ausente nos primeiros 100 dias do governo eleito em 2026 — sem sinalização de política de Estado',
+      ]
+    }
+  ]
+},
+
+// ─── CENÁRIO I ────────────────────────────────────────────────────────────────
+{
+  id: 'cen-I', code: 'I', badge: 'Matriz FM-T1+ × FM-T2−',
+  name: 'Ilha da Excelência Digital',
+  subtitle: 'Governança forte, digitalização fragmentada — tensão em movimento',
+  group: 'matriz', color: 'amber',
+  meta: ['FM-T1+', 'FM-T2−', 'E1/E2 instável'],
+  fm: ['IND-006 Σ13T avança', 'IND-009 + IND-019 persistem', 'Ilhas sem escala'],
+  anchor: {
+    text: '"Existem ilhas de excelência no setor privado, mas a fragmentação é a regra."',
+    source: 'Medici (T07)'
+  },
+  sections: [
+    {
+      title: 'Por que é instável por natureza',
+      prose: 'O Cenário I não é equilíbrio — é tensão em movimento. A reforma política avança enquanto a digitalização fica para trás. O sistema ganha governança, perde velocidade tecnológica. O Previne Brasil consolida 80% da população na APS, o QualiSUS Cárdio reinstitui VBHC em 200 hospitais — mas a RNDS com 4,3bi de registros não conversa com o setor suplementar. 92% das UBS digitalizadas que não dialogam com os planos de saúde.',
+    },
+    {
+      title: 'O que avança vs. o que fica para trás',
+      cards: [
+        { num: 'Avança', title: 'FM-T1+ em ação', body: 'Previne Brasil: 80% da pop. na APS. QualiSUS Cárdio: 200 hospitais VBHC. Nova Indústria Brasil: 45%→70% produção nacional. Pacto social Lei 9.656.', source: 'Queiroga (T21)' },
+        { num: 'Fica', title: 'FM-T2− persiste', body: 'RNDS cresce mas governa só o SUS. PL 7.419 trata problemas de 2003 (Rebelo, T19). 17 anos para cirurgia robótica. Pacientes no TikTok como única IA.', source: 'Teich (T16)' },
+      ]
+    },
+    {
+      title: 'As quatro ilhas documentadas no corpus',
+      cards: [
+        { num: 'Ilha 1', title: 'Sabin', body: '14 estados, 359 unidades, Open Care em parceria RNDS. Referência nacional de ecossistema integrado.', source: 'Lídia Abdalla (T12)' },
+        { num: 'Ilha 2', title: 'Butantan', body: 'Hub regional: vacinas para dengue, chikungunya, zika. Uruguai, Paraguai e Bolívia dependentes.', source: 'Roca (T14)' },
+        { num: 'Ilha 3', title: 'QualiSUS Cárdio', body: 'VBHC em escala SUS — 200 hospitais voluntários, modulação até 70% por desfecho. Reinstitído.', source: 'Queiroga (T21)' },
+        { num: 'Ilha 4', title: 'RNDS–APS', body: '92% UBS com prontuário eletrônico. 4,3bi registros. Sem integração com suplementar.', source: 'Haddad (T10)' },
+      ]
+    },
+    {
+      title: 'Por que as ilhas não escalam — as 3 barreiras de Arantes (T20)',
+      pills: ['Regulatória — não induz interop.', 'Concorrencial — dados como ativo', 'Rotatividade 2-3 anos = desincentivo'],
+    },
+    {
+      title: 'Migração possível',
+      cards: [
+        { num: '→ Cenário II', title: 'Sistema Regenerativo', body: 'Se governança força decisão sobre RNDS: modelo B3 aprovado, Open Care obrigatório, digital escala.', source: '' },
+        { num: '→ Cenário IV', title: 'Plataforma sem República', body: 'Se governança não resolve digital: big techs preenchem vácuo, dados capturados antes do marco.', source: '' },
+      ]
+    },
+    {
+      title: 'Sinais precoces',
+      signals: [
+        'Previne Brasil e QualiSUS Cárdio mantidos pelo governo eleito em 2026',
+        'RNDS atinge 8 bilhões de registros sem marco regulatório de interoperabilidade com setor privado',
+      ]
+    }
+  ]
+},
+
+// ─── CENÁRIO II ───────────────────────────────────────────────────────────────
+{
+  id: 'cen-II', code: 'II', badge: 'Cenário-alvo ★',
+  name: 'Sistema Regenerativo',
+  subtitle: 'O único cenário onde a capacidade latente se realiza em escala',
+  group: 'matriz', color: 'teal',
+  meta: ['FM-T1+', 'FM-T2+', 'Cenário-alvo OPS 2050'],
+  fm: ['IND-006 + IND-013 simultâneos', 'RNDS soberana', 'VBHC universal'],
+  anchor: {
+    text: '"2.700 mortes no dia da posse. 90% de redução em seis meses. 48.000 UBS nos 5.570 municípios brasileiros."',
+    source: 'Queiroga (T21) · prova empírica de capacidade latente'
+  },
+  sections: [
+    {
+      title: 'Por que é o cenário-alvo do OPS 2050',
+      prose: 'O Cenário II não é utopia — é o único onde a capacidade latente documentada no corpus se realiza em escala. Queiroga (T21) fornece a evidência mais poderosa: o mesmo sistema que registrava 2.700 mortes/dia reduziu essa taxa em 90% em seis meses usando a mesma infraestrutura existente de 48.000 UBS. Não foram construídos novos hospitais. Foi vontade política ativando capacidade latente. Arantes (T20) corrobora: "A trajetória empírica do setor brasileiro de saúde, medida objetivamente, é de melhorias contínuas."',
+    },
+    {
+      title: 'Os cinco movimentos convergentes',
+      cards: [
+        { num: 'Movimento 1', title: 'Financiamento equânime', body: 'URV da saúde aprovada. Teto MAC redistribuído por critérios epidemiológicos. Inversão dos terços federativos endereçada.', source: 'Queiroga (T21), Hamida (T18)' },
+        { num: 'Movimento 2', title: 'Soberania digital', body: '"A interoperabilidade sozinha reduz 15% do custo" (Cerri, T11). Modelo B3 aprovado como hub central. Open Care garante portabilidade ao paciente.', source: 'Cerri (T11), Lídia (T12)' },
+        { num: 'Movimento 3', title: 'Inversão do paradigma', body: '"90% do valor vem de prevenção, mas a alocação é oposta" (Cássio, T04). VBHC escala via Quintuple Aim. 80% da pop. na APS.', source: 'Cássio (T04), Queiroga (T21)' },
+        { num: 'Movimento 4', title: 'Regulação calibrada', body: '"ANVISA opera com IA para regular IA" (Thiago, T05). Sandbox e RWE como padrão. Coordenação ANVISA-CONITEC-ANS funcional.', source: 'Thiago (T05)' },
+        { num: 'Movimento 5', title: 'Hub regional', body: 'Butantan: vacinas para 4 países latinos. NIB eleva produção nacional 45%→70% até 2032. Exportações MedTech crescem.', source: 'Roca (T14), Pizetta (T15)' },
+      ]
+    },
+    {
+      title: 'A sincronização como desafio central',
+      prose: 'O Cenário II é difícil porque exige as duas forças motrizes em simultâneo. Governança sem digital = Cenário I (ilhas sem escala). Digital sem governança = Cenário IV (plataforma capturada). A janela de Arantes (T20) é de 7-8 anos a partir de 2026. Rebelo (T19) formula o horizonte: "Integração é a palavra-chave — saúde suplementar e SUS, com o paciente no centro."',
+    },
+    {
+      title: 'Sinais precoces',
+      signals: [
+        'Marco regulatório de interoperabilidade obrigatória aprovado com prazo de 18 meses para operadoras',
+        'Decisão pública de governança da RNDS em nuvens soberanas publicada com prazo de implementação',
+        'QualiSUS Cárdio reinstituído e expandido para além de 200 hospitais',
+      ]
+    }
+  ]
+},
+
+// ─── CENÁRIO III ──────────────────────────────────────────────────────────────
+{
+  id: 'cen-III', code: 'III', badge: 'FM-T1− × FM-T2−',
+  name: 'Simulacro Permanente',
+  subtitle: 'O mais provável sem intervenção — 147 trechos em 20 transcrições',
+  group: 'matriz', color: 'red',
+  meta: ['FM-T1−', 'FM-T2−', '147 trechos · 20 transcrições'],
+  fm: ['IND-001 Σ43', 'IND-008 Σ26', 'IND-005 Σ22', 'IND-002/004 Σ36'],
+  anchor: {
+    text: '"Sem enfrentamento visceral dos problemas reais, o sistema continuará numa simulação que coloca em xeque a vida dos pacientes."',
+    source: 'Hamid Rahimi (T02) · a formulação mais precisa do cenário em todo o corpus'
+  },
+  sections: [
+    {
+      title: 'O que é um simulacro — e por que é o pior cenário',
+      prose: 'O Cenário III não é o colapso. É algo mais insidioso: a aparência de funcionamento que mascara dívidas crescentes. É pior que o colapso porque o colapso é visível e força resposta. O simulacro é invisível e permite que o sistema acumule tensão sem mobilizar a sociedade. A fila cirúrgica que chegou a 1,3 milhão em 2024 não provoca crise política — porque cada paciente acha que seu caso é individual. O sistema transformou um problema coletivo em milhões de tragédias particulares.',
+    },
+    {
+      title: 'Os cinco mecanismos que sustentam o simulacro',
+      cards: [
+        { num: 'M1', title: 'O mínimo que virou máximo', body: 'Aith (T02): "O mínimo constitucional virou o teto." R$180/habitante/mês para tudo, de vacinação a transplante. UK: R$24.000. Dinamarca: R$32.000.', source: 'Teich (T16), Hamida (T18)' },
+        { num: 'M2', title: 'Os dados que mentem', body: 'Westenberger (T03): "50% dos arquivos da ANS e SUSEP falham na malha de crítica." CID proibido nas guias. DRG: 96% no SUS-MG vs. <45% na suplementar SP.', source: 'Westenberger (T03)' },
+        { num: 'M3', title: 'A judicialização invisível', body: 'Matos (T02): "Médicos coagidos a não prescrever criam judicialização invisível." 40 mil novos acionamentos no 1º trimestre de 2026.', source: 'SED T02' },
+        { num: 'M4', title: 'Sistema recompensa ineficiência', body: 'Abicalaffe (T08): "O sistema foi construído para abafar a inovação." Brasil top 10 em ciência, posição 60-70 em inovação.', source: 'Pizetta (T15)' },
+        { num: 'M5', title: 'Inversão federativa', body: 'Hamida (T18): "Quem arrecada 2/3 custeia 1/3. Quem arrecada 1/3 custeia 2/3." Uma decisão judicial pode comprometer todo o orçamento municipal.', source: 'Hamida (T18)' },
+      ]
+    },
+    {
+      title: 'A dívida invisível em três dimensões',
+      cards: [
+        { num: 'Dívida 1', title: 'Demográfica', body: 'Pirâmide em barril. 53M suplementar, 70-80M informal sem contribuir. Custo do idoso crescendo.', source: 'Westenberger (T03)' },
+        { num: 'Dívida 2', title: 'Industrial', body: 'IFAs nacionais <10%. Penicilina básica dependente da Índia. Dependência revelada na pandemia.', source: 'Mussolini (T17)' },
+        { num: 'Dívida 3', title: 'Clínica', body: '1,3M aguardando cirurgia. 82% oncológicos em luta por direitos. Oncológicos em estágio avançado custam 40× mais.', source: 'Marlene (T04), Holtz (T09)' },
+      ]
+    },
+    {
+      title: 'Por que é o mais provável sem intervenção',
+      prose: 'O Cenário III não requer nenhuma decisão ativa para se realizar. É o estado de inércia — onde todos os vetores do corpus convergem sem ruptura visível. Westenberger (T03): "A probabilidade de consertar tudo até 2050, no cenário atual, é zero. Se mexer nos vetores certos: 10 a 15 anos." E2 domina 55% das referências no corpus. Não é colapso — é E2 permanente com deslizamento para E3 em segmentos específicos.',
+    },
+    {
+      title: 'Sinais precoces',
+      signals: [
+        'Fila cirúrgica supera 1,5 milhão por segundo ano consecutivo sem plano de enfrentamento',
+        'Novo relatório rejeitando >50% dos dados da ANS — confirmando padrão Westenberger',
+        'R$ 6-7bi em fraudes documentadas pela ANS sem operação de fiscalização correspondente',
+      ]
+    }
+  ]
+},
+
+// ─── CENÁRIO IV ───────────────────────────────────────────────────────────────
+{
+  id: 'cen-IV', code: 'IV', badge: 'FM-T1− × FM-T2+',
+  name: 'Plataforma sem República',
+  subtitle: 'Inovação real, equidade zero — o mais difícil de reverter',
+  group: 'matriz', color: 'coral',
+  meta: ['FM-T1−', 'FM-T2+', 'Menor co-ocorrência = maior risco prospectivo'],
+  fm: ['IND-013 sem IND-006', 'IND-012 + IND-019', 'Digital capturado'],
+  anchor: {
+    text: '"Pacientes já recorrem espontaneamente a TikTok, Google e ChatGPT para análises médicas — fenômeno em curso, antecede qualquer resposta institucional."',
+    source: 'Teich (T16) · o futuro do Cenário IV já está acontecendo no presente'
+  },
+  sections: [
+    {
+      title: 'O paradoxo central — inovação real, equidade zero',
+      prose: 'O Cenário IV é o mais contraintuitivo dos oito. Não há escassez de inovação — há aceleração. O mercado de saúde digital cresce, novas plataformas surgem, algoritmos clínicos se multiplicam. O paradoxo é que essa aceleração acontece sem soberania pública, sem equidade e sem capacidade regulatória de acompanhá-la. Coelho (T11): "O dado hoje é o novo ouro — quem tiver supercomputadores para processar dados em escala, terá vantagem." No Cenário IV, esse ouro não está no Brasil.',
+    },
+    {
+      title: 'Os quatro vetores que produzem o cenário',
+      cards: [
+        { num: 'Vetor 1', title: 'Regulador atrás do regulado', body: 'Thiago (T05): "ANVISA precisa operar com IA para regular IA — sem essa simetria, o regulador opera estruturalmente atrás do regulado." Orçamento ANVISA insuficiente. 25 certificadores para país continental.', source: 'Thiago (T05)' },
+        { num: 'Vetor 2', title: 'Dados como ativo privado', body: 'Arantes (T20): operadoras retêm dados como ativo competitivo. Rotatividade de 2-3 anos = desincentivo ao investimento em jornada longitudinal. Sem obrigatoriedade de portabilidade.', source: 'Arantes (T20)' },
+        { num: 'Vetor 3', title: 'Litigância de IA sem marco', body: 'Rocha (T02): "Litígios internacionais: pacientes acionando hospitais por IA sem consentimento, robôs cirúrgicos com problemas." CFM(ago/2026): responsabilidade ao médico sem resolver questão preventiva.', source: 'Rocha (T02)' },
+        { num: 'Vetor 4', title: 'Mercado cresce, fraude cresce', body: 'Novaes (T18): "R$ 6-7bi anuais em fraudes. Brasil campeão mundial em ressonância — mais do dobro do uso per capita americano. Vitamina D excessiva." Volume sem desfecho.', source: 'Novaes (T18)' },
+      ]
+    },
+    {
+      title: 'Nota metodológica — por que a escassez de trechos é o achado',
+      prose: 'O Cenário IV tem o menor número de co-ocorrências diretas no corpus. Isso não é limitação — é sinal analítico de primeira ordem. Os 21 entrevistados não estão descrevendo o Cenário IV como realidade instalada. Estão documentando seus elementos constitutivos e alertando para o risco de sua emergência. Isso faz do Cenário IV o mais prospectivo dos oito — e o único cuja prevenção precisa acontecer antes que seja claramente visível. Quando seus sinais aparecerem nitidamente no corpus, o ponto de não-retorno já terá sido ultrapassado.',
+    },
+    {
+      title: 'Por que é o mais difícil de reverter',
+      prose: 'Nos Cenários I e III, a governança pode ainda agir — o digital não se moveu. No Cenário IV, o digital já se moveu sem governança, e cada avanço da plataforma aumenta o custo de retomada pelo Estado. Dados capturados por big techs não voltam espontaneamente. Contratos de infraestrutura de IA assinados sem cláusula de soberania criam dependência estrutural. A reversão exige muito mais do que a prevenção teria exigido.',
+    },
+    {
+      title: 'Sinais precoces',
+      signals: [
+        'Contrato público com big tech estrangeira para processar dados da RNDS sem cláusula de soberania nacional',
+        'MedTech crescimento >12%/ano sem melhora correspondente nos indicadores de saúde da população',
+        'Primeiro acionamento judicial por uso de IA médica sem consentimento informado no Brasil',
+      ]
+    }
+  ]
+}
+
+];
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+
+function renderScenarios(list) {
+  const container = document.getElementById('scenarios-list');
+  container.innerHTML = '';
+  list.forEach(c => {
+    const el = document.createElement('div');
+    el.className = `scenario-item var-${c.color}`;
+    el.id = c.id;
+    el.dataset.group = c.group;
+    el.dataset.color = c.color;
+
+    const metaHtml = c.meta.map(m => `<span class="meta-pill">${m}</span>`).join('');
+    const fmHtml = c.fm.map(f => `<span class="fm-tag" style="border-color:var(--${c.color}-border);color:var(--${c.color})">${f}</span>`).join('');
+
+    let sectionsHtml = '';
+
+    // Matrix locator for I-IV
+    if (['I','II','III','IV'].includes(c.code)) {
+      const cells = [
+        {code:'I', label:'I\nIlha'},
+        {code:'II', label:'II\nRegen.'},
+        {code:'III', label:'III\nSimulacro'},
+        {code:'IV', label:'IV\nPlat.'},
+      ];
+      const locHtml = cells.map(cell => {
+        const active = cell.code === c.code;
+        return `<div class="ml-cell ${active ? 'active' : ''}" style="${active ? `background:var(--${c.color}-dim);border-color:var(--${c.color}-border);color:var(--${c.color})` : ''}">${cell.label}</div>`;
+      }).join('');
+      sectionsHtml += `<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">${locHtml}</div>
+        <div class="fm-tags" style="margin:0">${fmHtml}</div>
+      </div>`;
+    } else {
+      sectionsHtml += `<div class="fm-tags" style="margin-bottom:18px">${fmHtml}</div>`;
+    }
+
+    // Anchor
+    sectionsHtml += `<div class="anchor-quote">
+      <div class="quote-text">${c.anchor.text}</div>
+      <div class="quote-source">— ${c.anchor.source}</div>
+    </div>`;
+
+    // Sections
+    c.sections.forEach((s, si) => {
+      sectionsHtml += `<div class="section"><div class="section-title"><span class="s-num">${String(si+1).padStart(2,'0')}</span>${s.title}</div>`;
+      if (s.prose) sectionsHtml += `<p class="prose">${s.prose}</p>`;
+      if (s.cards) {
+        sectionsHtml += `<div class="cards-grid">`;
+        s.cards.forEach(card => {
+          sectionsHtml += `<div class="card">
+            <div class="card-num">${card.num}</div>
+            <div class="card-title">${card.title}</div>
+            <div class="card-body">${card.body}</div>
+            ${card.source ? `<div class="card-source">${card.source}</div>` : ''}
+          </div>`;
+        });
+        sectionsHtml += `</div>`;
+      }
+      if (s.pills) {
+        sectionsHtml += `<div class="pills">`;
+        s.pills.forEach(p => sectionsHtml += `<span class="pill">${p}</span>`);
+        sectionsHtml += `</div>`;
+      }
+      if (s.signals) {
+        sectionsHtml += `<div class="signals">`;
+        s.signals.forEach(sig => {
+          sectionsHtml += `<div class="signal"><div class="signal-dot"></div><span>${sig}</span></div>`;
+        });
+        sectionsHtml += `</div>`;
+      }
+      sectionsHtml += `</div>`;
+      if (si < c.sections.length - 1) sectionsHtml += `<div class="body-divider"></div>`;
+    });
+
+    el.innerHTML = `
+      <div class="scenario-header" onclick="toggleItem('${c.id}')">
+        <span class="scenario-badge">${c.badge}</span>
+        <div class="scenario-titles">
+          <div class="scenario-id">Cenário ${c.code}</div>
+          <div class="scenario-name">${c.name}</div>
+          <div class="scenario-subtitle">${c.subtitle}</div>
+        </div>
+        <div class="scenario-meta">${metaHtml}</div>
+        <div class="chevron">▾</div>
+      </div>
+      <div class="scenario-body">
+        <div class="scenario-body-inner">${sectionsHtml}</div>
+      </div>`;
+    container.appendChild(el);
+  });
+}
+
+renderScenarios(CENARIOS);
+
+// ─── INTERACTIONS ─────────────────────────────────────────────────────────────
+
+function toggleItem(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+function jumpTo(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.add('open');
+  setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+}
+
+let allOpen = false;
+function toggleAll() {
+  allOpen = !allOpen;
+  document.querySelectorAll('.scenario-item').forEach(el => {
+    el.classList.toggle('open', allOpen);
+  });
+  document.querySelector('.expand-all').textContent = allOpen ? 'Recolher todos' : 'Expandir todos';
+}
+
+function filterAll(btn) {
+  setActive(btn);
+  renderScenarios(CENARIOS);
+}
+function filterGroup(group, btn) {
+  setActive(btn);
+  renderScenarios(CENARIOS.filter(c => c.group === group));
+}
+function filterColor(colors, btn) {
+  setActive(btn);
+  const cs = colors.split(' ');
+  renderScenarios(CENARIOS.filter(c => cs.includes(c.color)));
+}
+function setActive(btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// Clicks on matrix cells
+document.querySelectorAll('.matrix-cell').forEach(cell => {
+  cell.addEventListener('click', function() {
+    const id = this.getAttribute('onclick').match(/'([^']+)'/)[1];
+    jumpTo(id);
+  });
+});
+
+// Matrix cell hover
+document.querySelectorAll('.matrix-cell').forEach(cell => {
+  cell.addEventListener('mouseenter', function() {
+    this.style.opacity = '0.85';
+  });
+  cell.addEventListener('mouseleave', function() {
+    this.style.opacity = '';
+  });
+});
+</script>
+</body>
+</html>
